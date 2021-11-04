@@ -9,7 +9,7 @@ usage() {
     version
     cat <<- EOF
 
-Usage: $PROJECT [parameters...} <options>...
+Usage: $PROJECT [parameters] <options>...
 
 $PROJECT is a CLI tool written in BASH aimed at configuring Let's Encypt
 certificates for devices running the padavan / rt-n56u firmware.

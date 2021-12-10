@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
 
 readonly PROJECT=letsencrypt-padavan
-readonly VERSION=0.0.1
+readonly VERSION=1.0.0
 
 set -Eeuo pipefail
 
 usage() {
     version
-    cat <<- EOF
-
+    die "
 Usage: $PROJECT [parameters] <options>...
 
 $PROJECT is a CLI tool written in BASH aimed at configuring Let's Encypt
@@ -19,7 +18,8 @@ PARAMETERS:
 -p, --port <port>        Specifies SSH port used to connect to device.
 -k, --key <file>         Specifies private SSH key used to connect to device.
 -h, --host <host>        Specifies IP address used to connect to device.
--d, --domain <domain>    Specifies first domain used by certbot to generate the certificate.
+-d, --domain <domain>    Specifies first domain used by certbot to generate\
+ the certificate.
 -c, --config <file>      Specifies config file from which to read values.
 
 OPTIONS:
@@ -29,9 +29,7 @@ OPTIONS:
 --verbose        Output debug information.
 
 Report bugs to https://github.com/barnumbirr/letsencrypt-padavan/issues
-
-EOF
-    exit 1
+"
 }
 
 version() {
@@ -56,22 +54,13 @@ setup_colors() {
   fi
 }
 
-progress_spinner() {
-    local message="$1"
-    local pid=$!
-    local delay=0.1
-    local spinstr='|/-\'
-    while kill -0 $pid 2> /dev/null; do
-        local temp=${spinstr#?}
-        printf "[%c] $message" "$spinstr"
-        local spinstr=$temp${spinstr%"$temp"}
-        sleep $delay
-        local reset="\b\b\b\b\b\b"
-        for ((i=1; i<=$(echo "$message" | wc -c); i++)); do
-            reset+="\b"
-        done
-        printf $reset
+progressbar() {
+    printf "[✱] ["
+    while kill -0 $PID 2> /dev/null; do
+        printf  "▓"
+        sleep 0.1
     done
+    printf "]\n"
 }
 
 parse_params() {
@@ -122,7 +111,8 @@ parse_params() {
             shift
             ;;
         -?*)
-            die "Unknown option: $1\nSee --help for more details"
+            die "Unknown option: $1
+See --help for more details"
             ;;
         *)
             break
@@ -140,15 +130,15 @@ connect() {
 
     RESULT=$?
     if [[ ! $RESULT == 0 ]]; then
-        die "${RED}[✗] Error connecting to device. (${host})${NOFORMAT}"
+        die "${RED}[✗]${NOFORMAT} Error connecting to device. (${host})"
     else
-        log "${GREEN}[✓] Connection to device (${host}) successful!${NOFORMAT}"
+        log "${GREEN}[✓]${NOFORMAT} Connection to device (${host}) successful!"
     fi
 }
 
 system_info() {
     # ASCII art taken from https://github.com/dylanaraps/pfetch
-    cat <<- EOF
+    log "
 
         ____     $USER@$(uname -n)
        (.. |     os: $(uname -o)
@@ -158,51 +148,53 @@ system_info() {
      ( /  \\ /|   cpu: $(awk -F'(: )+' '/^system type/{ print $2 }' /proc/cpuinfo)\
  ($(awk '/^processor/ { N++} END { print N }' /proc/cpuinfo) cores)
     _/\\ __)/_)   memory: $(free -m | awk 'NR==2{printf "%.0f/%.0fMB\n", $3/1000,$2/1000}')
-    \/-____\/    shell: $(printf "$SHELL")
-
-EOF
+    \/-____\/    shell: $(echo "$SHELL")
+"
 }
 
-check_certificate() {
-    if [ ! -f "$CERT_CHAIN" ] && [ ! -f "$CERT_KEY" ]; then
-        cat <<- EOF
+check_certificate_exists() {
+    if [ ! -f "${CERT_CHAIN}" ] && [ ! -f "${CERT_KEY}" ]; then
+        die "
+${RED}[✗]${NOFORMAT} Local file(s) not found, please generate the required\
+ certificate(s) and retry:
 
-Local file(s) not found:
-   - $CERT_CHAIN
-   - $CERT_KEY
-
-Please generate the required certificate and retry.
-
-EOF
-        exit 1
+    - \"${CERT_CHAIN}\"
+    - \"${CERT_KEY}\"
+"
     fi
 }
 
 upload_files() {
+    log "[✱] Uploading certificate"
     scp -q -P "${PADAVAN_SSH_PORT}" -i "${PADAVAN_PRIVATE_KEY}" "${CERT_CHAIN}"\
- "${PADAVAN_USER}"@"${host}":/etc/storage/https/server.crt &
-    scp -q  -P "${PADAVAN_SSH_PORT}" -i "${PADAVAN_PRIVATE_KEY}" "${CERT_KEY}"\
- "${PADAVAN_USER}"@"${host}":/etc/storage/https/server.key &
-    progress_spinner "Uploading certificate and key..."
-    if [ $? -eq 0 ];
-    then
-        log "${GREEN}[✓] Certificate and key uploaded successfully.${NOFORMAT}"
+ "${PADAVAN_USER}"@"${host}":/etc/storage/https/server.crt & PID=$!
+    progressbar
+
+    if [ $? -eq 0 ]; then
+        log "${GREEN}[✓]${NOFORMAT} Certificate uploaded successfully."
     else
-        die "${RED}[✗] Certificate and key upload failed.${NOFORMAT}"
+        die "${RED}[✗]${NOFORMAT} Certificate upload failed."
+    fi
+
+    log "[✱] Uploading key"
+    scp -q  -P "${PADAVAN_SSH_PORT}" -i "${PADAVAN_PRIVATE_KEY}" "${CERT_KEY}"\
+ "${PADAVAN_USER}"@"${host}":/etc/storage/https/server.key & PID=$!
+    progressbar
+
+    if [ $? -eq 0 ]; then
+        log "${GREEN}[✓]${NOFORMAT} Certificate key uploaded successfully."
+    else
+        die "${RED}[✗]${NOFORMAT} Certificate key upload failed."
     fi
 }
 
 restart_httpd() {
     killall httpd && /usr/sbin/httpd -s 443
-    if [ $? -eq 0 ];
-    then
-        log "\033[0;32m[✓] httpd restarted successfully! Device should now be accessible\
- over HTTPS.\033[0m"
-        # log "${GREEN}[✓] httpd restarted successfully! Device should now be accessible\
-# over HTTPS.${NOFORMAT}"
+    if [ $? -eq 0 ]; then
+        log "${GREEN}[✓]${NOFORMAT} httpd restarted successfully! Device\
+ should now be accessible over HTTPS."
     else
-        die "\033[0;31m[✗] httpd restart failed on device.\033[0m"
-        # die "${RED}[✗] httpd restart failed on device.${NOFORMAT}"
+        die "${RED}[✗]${NOFORMAT} httpd restart failed on device."
     fi
 }
 
@@ -211,7 +203,7 @@ main() {
     readonly CERT_KEY=/etc/letsencrypt/live/${DOMAIN}/privkey.pem
 
     for host in "${PADAVAN_HOSTS[@]}"; do
-        check_certificate
+        check_certificate_exists
         connect
         $device "$(declare -f log die system_info); system_info"
         upload_files

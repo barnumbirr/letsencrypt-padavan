@@ -14,6 +14,17 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Fixes
 ### Security
 
+## [1.1.0] - 14-12-2021
+
+### Changes
+
+- Added function to get certificate details
+- Use local functions and consolidate script output
+
+### Fixes
+
+- Move `check_certificate_exists` outside of main() for loop
+
 ## [1.0.0] - 10-12-2021
 
 ### Changes

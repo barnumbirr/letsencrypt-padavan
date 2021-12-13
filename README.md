@@ -11,7 +11,6 @@ $ cd /opt/
 $ git clone https://github.com/barnumbirr/letsencrypt-padavan.git
 $ cd letsencrypt-padavan
 $ cp sample.conf my.conf
-$ nano my.conf
 ```
 
 ## Usage
@@ -20,6 +19,47 @@ Pass all parameters to `letsencrypt-padavan`:
 
 ```bash
 $ /opt/letsencrypt-padavan/bin/letsencrypt-padavan -u root -p 22 -k /opt/letsencrypt-padavan/id_ed25519 -h 10.0.1.253 -h 10.0.1.254 -d abc.yourdomain.com
+
+[✱] About to deploy "/etc/letsencrypt/live/abc.yourdomain.com/cert.pem:"
+        Subject: CN = abc.yourdomain.com
+        Not Before: Nov 28 09:19:32 2021 GMT
+        Not After : Feb 26 09:19:31 2022 GMT
+        RSA Public-Key: (4096 bit)
+        DNS:abc.yourdomain.com, DNS:xyz.yourdomain.com
+
+[✓] Connection to device (10.0.1.253) successful!
+        ____     root@ap1
+       (.. |     os: GNU/Linux
+       (<> |     kernel: 3.4.113
+      / __  \    uptime: 90d16h8m
+     ( /  \ /|   cpu: MediaTek MT7621 SoC (4 cores)
+    _/\ __)/_)   memory: 21/256MB
+    \/-____\/    shell: "/bin/sh"
+[✱] Uploading certificate...
+[✱] [▓▓▓▓]
+[✓] Certificate uploaded successfully.
+[✱] Uploading key...
+[✱] [▓▓▓▓]
+[✓] Certificate key uploaded successfully.
+[✓] httpd restarted successfully! Device should now be accessible over HTTPS.
+
+[✓] Connection to device (10.0.1.254) successful!
+        ____     root@ap2
+       (.. |     os: GNU/Linux
+       (<> |     kernel: 3.4.113
+      / __  \    uptime: 31d23h8m
+     ( /  \ /|   cpu: MediaTek MT7621 SoC (4 cores)
+    _/\ __)/_)   memory: 21/256MB
+    \/-____\/    shell: "/bin/sh"
+[✱] Uploading certificate...
+[✱] [▓▓▓▓]
+[✓] Certificate uploaded successfully.
+[✱] Uploading key...
+[✱] [▓▓▓▓]
+[✓] Certificate key uploaded successfully.
+[✓] httpd restarted successfully! Device should now be accessible over HTTPS.
+
+$
 ```
 
 Use the config file:

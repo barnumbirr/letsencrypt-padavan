@@ -28,8 +28,7 @@ OPTIONS:
 --no-color       Do not output colored text.
 --verbose        Output debug information.
 
-Report bugs to https://github.com/barnumbirr/letsencrypt-padavan/issues
-"""
+Report bugs to https://github.com/barnumbirr/letsencrypt-padavan/issues"""
 }
 
 version() {
@@ -41,7 +40,8 @@ log() {
 }
 
 die() {
-    log "$1"
+    local log=$1
+    log "$log"
     exit 1
 }
 

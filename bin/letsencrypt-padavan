@@ -125,7 +125,7 @@ See --help for more details"
 }
 
 connect() {
-    device="ssh -i ${PADAVAN_PRIVATE_KEY} ${PADAVAN_USER}@${host}\
+    device="ssh -qt -i ${PADAVAN_PRIVATE_KEY} ${PADAVAN_USER}@${host}\
  -p ${PADAVAN_SSH_PORT}"
 
     RESULT=$?
@@ -230,7 +230,7 @@ main() {
         connect
         $device "$(declare -f log die system_info); system_info"
         upload_files
-        $device "$(declare -f log die restart_httpd); restart_httpd"
+        $device "$(declare -f log die setup_colors restart_httpd); setup_colors; restart_httpd"
     done
 }
 

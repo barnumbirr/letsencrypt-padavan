@@ -81,7 +81,7 @@ $ /opt/letsencrypt-padavan/bin/letsencrypt-padavan -c /opt/letsencrypt-padavan/m
 ## License:
 
 ```
-Copyright 2021 Martin Simon
+Copyright 2021-2025 Martin Simon
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

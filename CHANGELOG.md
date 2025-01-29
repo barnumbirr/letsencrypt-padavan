@@ -14,6 +14,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Fixes
 ### Security
 
+## [1.1.1] - 29-01-2025
+
+### Fixes
+
+- Add colored output to remote SSH session
+
 ## [1.1.0] - 14-12-2021
 
 ### Changes

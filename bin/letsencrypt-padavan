@@ -128,12 +128,10 @@ connect() {
     device="ssh -qt -i ${PADAVAN_PRIVATE_KEY} ${PADAVAN_USER}@${host}\
  -p ${PADAVAN_SSH_PORT}"
 
-    RESULT=$?
-
-    if [[ $RESULT == 0 ]]; then
+    if $device true 2>/dev/null; then
         log "${GREEN}[✓]${NOFORMAT} Connection to device (${host}) successful!"
     else
-        die "${RED}[✗]${NOFORMAT} Error connecting to device. (${host})"
+        die "${RED}[✗]${NOFORMAT} Error connecting to device (${host})."
     fi
 }
 
@@ -168,11 +166,10 @@ get_certificate_info() {
     else
         CERTIFICATE=$(openssl x509 -noout -text -in "${CERT_CHAIN}")
         log """
-${GREEN}[✱]${NOFORMAT} About to deploy \"${CERT_CHAIN}:\"
+${GREEN}[✱]${NOFORMAT} About to deploy \"${CERT_CHAIN}\":
         $(echo "${CERTIFICATE}" | grep 'Subject:' | sed -e 's/^\s*//' -e '/^$/d')
         $(echo "${CERTIFICATE}" | grep 'Not Before' | sed -e 's/^\s*//' -e '/^$/d')
         $(echo "${CERTIFICATE}" | grep 'Not After' | sed -e 's/^\s*//' -e '/^$/d')
-        $(echo "${CERTIFICATE}" | grep 'RSA Public-Key' | sed -e 's/^\s*//' -e '/^$/d')
         $(echo "${CERTIFICATE}" | grep 'DNS' | sed -e 's/^\s*//' -e '/^$/d')
 """
     fi

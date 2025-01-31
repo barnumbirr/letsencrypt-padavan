@@ -14,6 +14,16 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Fixes
 ### Security
 
+## [1.1.2] - 31-01-2025
+
+### Changes
+
+- Remove public key from certificate information
+
+### Fixes
+
+- Improve ssh connection error handling
+
 ## [1.1.1] - 29-01-2025
 
 ### Fixes
